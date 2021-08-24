@@ -15,10 +15,10 @@ import java.sql.SQLException;
  */
 public class db {
 
-    protected static String DB_URL = "jdbc:mysql://localhost:3306/urdu-bazaar";
-    protected static String DRIVER_URL = "com.mysql.cj.jdbc.Driver";
-    protected static String USER = "root";
-    protected static String PASSWORD = "root1234$";
+    public static String DB_URL = "jdbc:mysql://localhost:3306/urdu-bazaar";
+    public static String DRIVER_URL = "com.mysql.cj.jdbc.Driver";
+    public static String USER = "root";
+    public static String PASSWORD = "root1234$";
 
     public static Connection getConnection() throws ClassNotFoundException, SQLException {
         Connection con;

@@ -18,6 +18,31 @@ USE `urdu-bazaar`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `account_names`
+--
+
+DROP TABLE IF EXISTS `account_names`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `account_names` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL DEFAULT 'N/A',
+  `active` tinyint NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9076 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `account_names`
+--
+
+LOCK TABLES `account_names` WRITE;
+/*!40000 ALTER TABLE `account_names` DISABLE KEYS */;
+INSERT INTO `account_names` VALUES (1000,'Asset',1),(2000,'Liability',1),(3000,'Expenses',1),(4000,'Revenue',1),(5000,'Equity',1);
+/*!40000 ALTER TABLE `account_names` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `account_types`
 --
 
@@ -25,11 +50,10 @@ DROP TABLE IF EXISTS `account_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `account_types` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `type` varchar(200) NOT NULL DEFAULT 'N/A',
-  `active` tinyint NOT NULL DEFAULT '1',
+  `id` int NOT NULL,
+  `type` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9076 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +62,7 @@ CREATE TABLE `account_types` (
 
 LOCK TABLES `account_types` WRITE;
 /*!40000 ALTER TABLE `account_types` DISABLE KEYS */;
-INSERT INTO `account_types` VALUES (1000,'Asset',1),(2000,'Liability',1),(3000,'Expenses',1),(4000,'Revenue',1),(5000,'Equity',1);
+INSERT INTO `account_types` VALUES (1,'Debit'),(2,'Credit');
 /*!40000 ALTER TABLE `account_types` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -52,11 +76,11 @@ DROP TABLE IF EXISTS `accounts`;
 CREATE TABLE `accounts` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
-  `account_type_fk` int DEFAULT '0',
+  `account_name_fk` int DEFAULT '0',
   `active` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `account_type_fk_idx` (`account_type_fk`),
-  CONSTRAINT `account_type_fk` FOREIGN KEY (`account_type_fk`) REFERENCES `account_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `account_type_fk_idx` (`account_name_fk`),
+  CONSTRAINT `account_name_fk` FOREIGN KEY (`account_name_fk`) REFERENCES `account_names` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=9122 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -71,73 +95,48 @@ INSERT INTO `accounts` VALUES (9076,'Bank',1000,1),(9077,'Accounts Receivable',1
 UNLOCK TABLES;
 
 --
--- Table structure for table `credit_account`
+-- Table structure for table `accounts_entries`
 --
 
-DROP TABLE IF EXISTS `credit_account`;
+DROP TABLE IF EXISTS `accounts_entries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `credit_account` (
+CREATE TABLE `accounts_entries` (
   `id` int NOT NULL AUTO_INCREMENT,
   `description` varchar(200) DEFAULT NULL,
   `entry_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `amount` double NOT NULL DEFAULT '0',
-  `general_fk` int DEFAULT NULL,
+  `account_general_fk` int DEFAULT NULL,
   `user_id_fk` int DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `account_fk_idx` (`general_fk`),
-  CONSTRAINT `credit_general_fk` FOREIGN KEY (`general_fk`) REFERENCES `general_ledgers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `credit_account`
---
-
-LOCK TABLES `credit_account` WRITE;
-/*!40000 ALTER TABLE `credit_account` DISABLE KEYS */;
-/*!40000 ALTER TABLE `credit_account` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `debit_account`
---
-
-DROP TABLE IF EXISTS `debit_account`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `debit_account` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `description` varchar(200) DEFAULT NULL,
-  `entry_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `amount` double NOT NULL DEFAULT '0',
-  `general_fk` int DEFAULT NULL,
-  `user_id_fk` int DEFAULT NULL,
+  `account_type_fk` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_fk_idx` (`user_id_fk`),
-  KEY `debit_general_fk_idx` (`general_fk`),
-  CONSTRAINT `debit_general_fk` FOREIGN KEY (`general_fk`) REFERENCES `general_ledgers` (`id`),
+  KEY `debit_general_fk_idx` (`account_general_fk`),
+  KEY `account_type_fk_idx` (`account_type_fk`),
+  CONSTRAINT `account_type_fk` FOREIGN KEY (`account_type_fk`) REFERENCES `account_types` (`id`),
+  CONSTRAINT `general_fk` FOREIGN KEY (`account_general_fk`) REFERENCES `accounts_generals` (`id`),
   CONSTRAINT `user_fk` FOREIGN KEY (`user_id_fk`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `debit_account`
+-- Dumping data for table `accounts_entries`
 --
 
-LOCK TABLES `debit_account` WRITE;
-/*!40000 ALTER TABLE `debit_account` DISABLE KEYS */;
-/*!40000 ALTER TABLE `debit_account` ENABLE KEYS */;
+LOCK TABLES `accounts_entries` WRITE;
+/*!40000 ALTER TABLE `accounts_entries` DISABLE KEYS */;
+INSERT INTO `accounts_entries` VALUES (1,'Deposit Money','2021-08-24 00:00:00',15000,1,1,2);
+/*!40000 ALTER TABLE `accounts_entries` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `general_ledgers`
+-- Table structure for table `accounts_generals`
 --
 
-DROP TABLE IF EXISTS `general_ledgers`;
+DROP TABLE IF EXISTS `accounts_generals`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `general_ledgers` (
+CREATE TABLE `accounts_generals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `description` varchar(200) NOT NULL DEFAULT 'N/A',
@@ -149,16 +148,17 @@ CREATE TABLE `general_ledgers` (
   PRIMARY KEY (`id`),
   KEY `account_fk_idx` (`account_fk`),
   CONSTRAINT `account_fk` FOREIGN KEY (`account_fk`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `general_ledgers`
+-- Dumping data for table `accounts_generals`
 --
 
-LOCK TABLES `general_ledgers` WRITE;
-/*!40000 ALTER TABLE `general_ledgers` DISABLE KEYS */;
-/*!40000 ALTER TABLE `general_ledgers` ENABLE KEYS */;
+LOCK TABLES `accounts_generals` WRITE;
+/*!40000 ALTER TABLE `accounts_generals` DISABLE KEYS */;
+INSERT INTO `accounts_generals` VALUES (1,'2021-08-24 13:18:23','Bank Cash and Withdraw account',62000,62000,62000,62000,9076);
+/*!40000 ALTER TABLE `accounts_generals` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -181,7 +181,7 @@ CREATE TABLE `users` (
   `active` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -190,6 +190,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'Umar','Draz','umardraz@gmail.com','admin','000',NULL,'03219598676','03219598676',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -202,4 +203,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-23 14:08:30
+-- Dump completed on 2021-08-24 13:20:53
